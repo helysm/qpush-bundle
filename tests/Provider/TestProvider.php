@@ -40,13 +40,11 @@ class TestProvider extends AbstractProvider
      */
     protected $client;
 
-    public function __construct($name, array $options, $client, Cache $cache, Logger $logger)
+    public function __construct($name, array $options, $client)
     {
         $this->name     = $name;
         $this->options  = $options;
         $this->client   = $client;
-        $this->cache    = $cache;
-        $this->logger   = $logger;
     }
 
     public function getProvider()

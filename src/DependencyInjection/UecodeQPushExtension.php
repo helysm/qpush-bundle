@@ -58,12 +58,8 @@ class UecodeQPushExtension extends Extension
         $loader->load('services.yml');
 
         $registry = $container->getDefinition('uecode_qpush.registry');
-        $cache    = $config['cache_service'] ?: 'uecode_qpush.file_cache';
 
         foreach ($config['queues'] as $queue => $values) {
-
-            // Adds logging property to queue options
-            $values['options']['logging_enabled'] = $config['logging_enabled'];
 
             $provider   = $values['provider'];
             $class      = null;
@@ -78,55 +74,13 @@ class UecodeQPushExtension extends Extension
                         $provider
                     );
                     break;
-                case 'ironmq':
-                    $class  = $container->getParameter('uecode_qpush.provider.ironmq');
-                    $client = $this->createIronMQClient(
-                        $config['providers'][$provider],
-                        $container,
-                        $provider
-                    );
-                    break;
-                case 'sync':
-                    $class  = $container->getParameter('uecode_qpush.provider.sync');
-                    $client = $this->createSyncClient();
-                    break;
-                case 'custom':
-                    $class  = $container->getParameter('uecode_qpush.provider.custom');
-                    $client = $this->createCustomClient($config['providers'][$provider]['service']);
-                    break;
-                case 'file':
-                    $class = $container->getParameter('uecode_qpush.provider.file');
-                    $values['options']['path'] = $config['providers'][$provider]['path'];
-                    break;
-                case 'doctrine':
-                    $class = $container->getParameter('uecode_qpush.provider.doctrine');
-                    $client = $this->createDoctrineClient($config['providers'][$provider]);
-                    break;
             }
 
             $definition = new Definition(
-                $class, [$queue, $values['options'], $client, new Reference($cache), new Reference('logger')]
+                $class, [$queue, $values['options'], $client]
             );
 
             $definition->setPublic(true);
-
-            $definition->addTag('monolog.logger', ['channel' => 'qpush'])
-                ->addTag(
-                    'uecode_qpush.event_listener',
-                    [
-                        'event' => "{$queue}.on_notification",
-                        'method' => "onNotification",
-                        'priority' => 255
-                    ]
-                )
-                ->addTag(
-                    'uecode_qpush.event_listener',
-                    [
-                        'event' => "{$queue}.message_received",
-                        'method' => "onMessageReceived",
-                        'priority' => -255
-                    ]
-                );
 
             $isProviderAWS = $config['providers'][$provider]['driver'] === 'aws';
             $isQueueNameSet = isset($values['options']['queue_name']) && !empty($values['options']['queue_name']);

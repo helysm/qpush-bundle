@@ -1,10 +1,11 @@
 QPush - Symfony2 Push Queue Bundle
 ==================================
 
-[![Build Status](https://img.shields.io/travis/uecode/qpush-bundle/master.svg?style=flat-square)](https://travis-ci.org/uecode/qpush-bundle)
-[![Quality Score](https://img.shields.io/scrutinizer/g/uecode/qpush-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/uecode/qpush-bundle/)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/uecode/qpush-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/uecode/qpush-bundle/)
-[![Total Downloads](http://img.shields.io/packagist/dt/uecode/qpush-bundle.svg?style=flat-square)](https://packagist.org/packages/uecode/qpush-bundle)
+----
+
+This is a simplified fork, only providing AWS implementation. No public support or maintenance is provided here.
+
+----
 
 ## Overview
 This bundle allows you to easily consume messages from Push Queues by simply
@@ -51,16 +52,13 @@ and provider options in the [full documentation](http://qpush-bundle.rtfd.org).
 
 uecode_qpush:
     providers:
-        ironmq:
-            token:      YOUR_IRON_MQ_TOKEN_HERE
-            project_id: YOUR_IRON_MQ_PROJECT_ID_HERE
         aws:
             key:    YOUR_AWS_KEY_HERE
             secret: YOUR_AWS_SECRET_HERE
             region: YOUR_AWS_REGION_HERE
     queues:
         my_queue_key:
-            provider: ironmq #or aws
+            provider: aws
             options:
                 queue_name: my_queue_name #optional. the queue name used on the provider
                 push_notifications: true

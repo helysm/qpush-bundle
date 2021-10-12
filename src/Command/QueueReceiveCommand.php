@@ -103,7 +103,7 @@ class QueueReceiveCommand extends Command implements ContainerAwareInterface
         if($messages) {
             foreach ($messages as $message) {
                 $messageEvent = new MessageEvent($name, $message);
-                $dispatcher->dispatch(Events::Message($name), $messageEvent);
+                $dispatcher->dispatch($messageEvent, Events::Message($name));
             }
         }
 

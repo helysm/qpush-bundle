@@ -64,7 +64,6 @@ class AwsProviderTest extends TestCase
     {
         $options = array_merge(
             [
-                'logging_enabled'             => false,
                 'push_notifications'          => true,
                 'notification_retries'        => 3,
                 'message_delay'               => 0,
@@ -87,17 +86,7 @@ class AwsProviderTest extends TestCase
             'region' => 'us-east-1'
         ]);
 
-        $cache = $this->createMock(
-            'Doctrine\Common\Cache\PhpFileCache',
-            [],
-            ['/tmp', 'qpush.aws.test.php']
-        );
-
-        $logger = $this->createMock(
-            'Symfony\Bridge\Monolog\Logger', [], ['qpush.test']
-        );
-
-        return new AwsProvider('test', $options, $client, $cache, $logger);
+        return new AwsProvider('test', $options, $client);
     }
 
     public function testGetProvider()
@@ -160,11 +149,6 @@ class AwsProviderTest extends TestCase
             'push_notifications' => false
         ]);
 
-        $stub = $provider->getCache();
-        $stub->expects($this->once())
-             ->method('contains')
-             ->will($this->returnValue(true));
-
         $this->assertTrue($provider->queueExists());
 
         $provider->createQueue();
@@ -185,11 +169,6 @@ class AwsProviderTest extends TestCase
             'fifo' => true,
             'content_based_deduplication' => false
         ]);
-
-        $stub = $provider->getCache();
-        $stub->expects($this->once())
-             ->method('contains')
-             ->will($this->returnValue(true));
 
         $this->assertTrue($provider->queueExists());
 
@@ -231,13 +210,6 @@ class AwsProviderTest extends TestCase
         $provider = $this->getAwsProvider();
 
         $this->assertFalse($provider->topicExists());
-
-        $stub = $provider->getCache();
-        $stub->expects($this->once())
-             ->method('contains')
-             ->will($this->returnValue(true));
-
-        $this->assertTrue($provider->topicExists());
 
         $provider->createTopic();
         $this->assertTrue($provider->topicExists());
@@ -298,11 +270,14 @@ class AwsProviderTest extends TestCase
     public function testOnNotificationSubscriptionEvent()
     {
         $dispatcher = $this->getMockForAbstractClass('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $this->provider->onNotification(new NotificationEvent(
-            'test',
-            NotificationEvent::TYPE_SUBSCRIPTION,
-            new Notification(123, "test", [])
-        ), NotificationEvent::TYPE_SUBSCRIPTION, $dispatcher);
+
+        $this->assertNull(
+            $this->provider->onNotification(new NotificationEvent(
+                'test',
+                NotificationEvent::TYPE_SUBSCRIPTION,
+                new Notification(123, "test", [])
+            ), NotificationEvent::TYPE_SUBSCRIPTION, $dispatcher)
+        );
 
     }
 
@@ -314,18 +289,22 @@ class AwsProviderTest extends TestCase
             new Notification(123, "test", [])
         );
 
-        $this->provider->onNotification(
-            $event,
-            NotificationEvent::TYPE_MESSAGE,
-            $this->createMock('Symfony\Component\EventDispatcher\EventDispatcherInterface')
+        $this->assertNull(
+            $this->provider->onNotification(
+                $event,
+                NotificationEvent::TYPE_MESSAGE,
+                $this->createMock('Symfony\Component\EventDispatcher\EventDispatcherInterface')
+            )
         );
     }
 
     public function testOnMessageReceived()
     {
-        $this->provider->onMessageReceived(new MessageEvent(
-            'test',
-            new Message(123, ['foo' => 'bar'], [])
-        ));
+        $this->assertNull(
+            $this->provider->onMessageReceived(new MessageEvent(
+                'test',
+                new Message(123, ['foo' => 'bar'], [])
+            ))
+        );
     }
 }

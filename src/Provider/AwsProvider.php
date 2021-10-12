@@ -27,8 +27,6 @@ use Aws\Sns\SnsClient;
 use Aws\Sqs\Exception\SqsException;
 use Aws\Sqs\SqsClient;
 
-use Doctrine\Common\Cache\Cache;
-use Monolog\Logger;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Uecode\Bundle\QPushBundle\Event\Events;
 use Uecode\Bundle\QPushBundle\Event\MessageEvent;
@@ -72,15 +70,11 @@ class AwsProvider extends AbstractProvider
      * @param string $name
      * @param array  $options
      * @param mixed  $client
-     * @param Cache  $cache
-     * @param Logger $logger
      */
-    public function __construct($name, array $options, $client, Cache $cache, Logger $logger)
+    public function __construct($name, array $options, $client)
     {
         $this->name     = $name;
         $this->options  = $options;
-        $this->cache    = $cache;
-        $this->logger   = $logger;
 
         // get() method used for sdk v2, create methods for v3
         $useGet = method_exists($client, 'get');
@@ -140,20 +134,12 @@ class AwsProvider extends AbstractProvider
      */
     public function destroy()
     {
-        $key = $this->getNameWithPrefix() . '_url';
-        $this->cache->delete($key);
-
         if ($this->queueExists()) {
             // Delete the SQS Queue
             $this->sqs->deleteQueue([
                 'QueueUrl' => $this->queueUrl
             ]);
-
-            $this->log(200,"SQS Queue removed", ['QueueUrl' => $this->queueUrl]);
         }
-
-        $key = $this->getNameWithPrefix() . '_arn';
-        $this->cache->delete($key);
 
         if ($this->topicExists() || !empty($this->queueUrl)) {
             // Delete the SNS Topic
@@ -165,8 +151,6 @@ class AwsProvider extends AbstractProvider
             $this->sns->deleteTopic([
                 'TopicArn' => $topicArn
             ]);
-
-            $this->log(200,"SNS Topic removed", ['TopicArn' => $topicArn]);
         }
 
         return true;
@@ -202,11 +186,6 @@ class AwsProvider extends AbstractProvider
         }
 
         if ($options['push_notifications']) {
-
-            if (!$this->topicExists()) {
-                $this->create();
-            }
-
             $message    = [
                 'default' => $this->getNameWithPrefix(),
                 'sqs'     => json_encode($message),
@@ -220,14 +199,6 @@ class AwsProvider extends AbstractProvider
                 'Message'          => json_encode($message),
                 'MessageStructure' => 'json'
             ]);
-
-            $context = [
-                'TopicArn'           => $this->topicArn,
-                'MessageId'          => $result->get('MessageId'),
-                'push_notifications' => $options['push_notifications'],
-                'publish_time'       => microtime(true) - $publishStart
-            ];
-            $this->log(200,"Message published to SNS", $context);
 
             return $result->get('MessageId');
         }
@@ -255,21 +226,12 @@ class AwsProvider extends AbstractProvider
 
         $result = $this->sqs->sendMessage($arguments);
 
-        $context = [
-            'QueueUrl'              => $this->queueUrl,
-            'MessageId'             => $result->get('MessageId'),
-            'push_notifications'    => $options['push_notifications'],
-            'fifo'                  => $options['fifo']
-        ];
-
         if ($this->isQueueFIFO()) {
             if (isset($arguments['MessageDeduplicationId'])) {
                 $context['message_deduplication_id'] = $arguments['MessageDeduplicationId'];
             }
             $context['message_group_id'] = $arguments['MessageGroupId'];
         }
-
-        $this->log(200,"Message published to SQS", $context);
 
         return $result->get('MessageId');
     }
@@ -309,10 +271,6 @@ class AwsProvider extends AbstractProvider
             }
 
             $message = new Message($id, $body, $metadata);
-
-            $context = ['MessageId' => $id];
-            $this->log(200,"Message fetched from SQS Queue", $context);
-
         }
 
         return $messages;
@@ -334,34 +292,20 @@ class AwsProvider extends AbstractProvider
             'ReceiptHandle' => $id
         ]);
 
-        $context = [
-            'QueueUrl'      => $this->queueUrl,
-            'ReceiptHandle' => $id
-        ];
-        $this->log(200,"Message deleted from SQS Queue", $context);
-
         return true;
     }
 
     /**
      * Return the Queue Url
      *
-     * This method relies on in-memory cache and the Cache provider
-     * to reduce the need to needlessly call the create method on an existing
-     * Queue.
+     * This method relies on in-memory cache to reduce the need to needlessly
+     * call the create method on an existing Queue.
      *
      * @return boolean
      */
     public function queueExists()
     {
         if (isset($this->queueUrl)) {
-            return true;
-        }
-
-        $key = $this->getNameWithPrefix() . '_url';
-        if ($this->cache->contains($key)) {
-            $this->queueUrl = $this->cache->fetch($key);
-
             return true;
         }
 
@@ -372,7 +316,6 @@ class AwsProvider extends AbstractProvider
 
             $this->queueUrl = $result->get('QueueUrl');
             if ($this->queueUrl !== null) {
-                $this->cache->save($key, $this->queueUrl);
 
                 return true;
             }
@@ -380,6 +323,41 @@ class AwsProvider extends AbstractProvider
 
         return false;
     }
+
+    /**
+     * Checks to see if a Topic exists
+     *
+     * This method relies on in-memory cache to reduce the need to needlessly
+     * call the create method on an existing Topic.
+     *
+     * @return boolean
+     */
+    public function topicExists()
+    {
+        if (isset($this->topicArn)) {
+            return true;
+        }
+
+        if (!empty($this->queueUrl)) {
+            $queueArn = $this->sqs->getQueueArn($this->queueUrl);
+            $topicArn = str_replace('sqs', 'sns', $queueArn);
+
+            try {
+                $this->sns->getTopicAttributes([
+                    'TopicArn' => $topicArn
+                ]);
+            } catch (SnsException $e) {
+                return false;
+            }
+
+            $this->topicArn = $topicArn;
+
+            return true;
+        }
+
+        return false;
+    }
+
 
     /**
      * Creates an SQS Queue and returns the Queue Url
@@ -406,11 +384,6 @@ class AwsProvider extends AbstractProvider
 
         $this->queueUrl = $result->get('QueueUrl');
 
-        $key = $this->getNameWithPrefix() . '_url';
-        $this->cache->save($key, $this->queueUrl);
-
-        $this->log(200, "Created SQS Queue", ['QueueUrl' => $this->queueUrl]);
-
         if ($this->options['push_notifications']) {
 
             $policy = $this->createSqsPolicy();
@@ -421,8 +394,6 @@ class AwsProvider extends AbstractProvider
                     'Policy'    => $policy,
                 ]
             ]);
-
-            $this->log(200, "Created Updated SQS Policy");
         }
     }
 
@@ -451,49 +422,6 @@ class AwsProvider extends AbstractProvider
     }
 
     /**
-     * Checks to see if a Topic exists
-     *
-     * This method relies on in-memory cache and the Cache provider
-     * to reduce the need to needlessly call the create method on an existing
-     * Topic.
-     *
-     * @return boolean
-     */
-    public function topicExists()
-    {
-        if (isset($this->topicArn)) {
-            return true;
-        }
-
-        $key = $this->getNameWithPrefix() . '_arn';
-        if ($this->cache->contains($key)) {
-            $this->topicArn = $this->cache->fetch($key);
-
-            return true;
-        }
-
-        if (!empty($this->queueUrl)) {
-            $queueArn = $this->sqs->getQueueArn($this->queueUrl);
-            $topicArn = str_replace('sqs', 'sns', $queueArn);
-
-            try {
-                $this->sns->getTopicAttributes([
-                    'TopicArn' => $topicArn
-                ]);
-            } catch (SnsException $e) {
-                return false;
-            }
-
-            $this->topicArn = $topicArn;
-            $this->cache->save($key, $this->topicArn);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Creates a SNS Topic and returns the ARN
      *
      * The create method for the SNS Topics is idempotent - if the topic already
@@ -514,11 +442,6 @@ class AwsProvider extends AbstractProvider
         ]);
 
         $this->topicArn = $result->get('TopicArn');
-
-        $key = $name . '_arn';
-        $this->cache->save($key, $this->topicArn);
-
-        $this->log(200, "Created SNS Topic", ['TopicARN' => $this->topicArn]);
 
         return true;
     }
@@ -566,13 +489,6 @@ class AwsProvider extends AbstractProvider
 
         $arn = $result->get('SubscriptionArn');
 
-        $context = [
-            'Endpoint' => $endpoint,
-            'Protocol' => $protocol,
-            'SubscriptionArn' => $arn
-        ];
-        $this->log(200, "Endpoint Subscribed to SNS Topic", $context);
-
         return $arn;
     }
 
@@ -597,13 +513,6 @@ class AwsProvider extends AbstractProvider
                 $this->sns->unsubscribe([
                     'SubscriptionArn' => $subscription['SubscriptionArn']
                 ]);
-
-                $context = [
-                    'Endpoint' => $endpoint,
-                    'Protocol' => $protocol,
-                    'SubscriptionArn' => $subscription['SubscriptionArn']
-                ];
-                $this->log(200,"Endpoint unsubscribed from SNS Topic", $context);
 
                 return true;
             }
@@ -638,17 +547,13 @@ class AwsProvider extends AbstractProvider
                 'Token'     => $token
             ]);
 
-            $context = ['TopicArn' => $topicArn];
-            $this->log(200,"Subscription to SNS Confirmed", $context);
-
             return;
         }
 
         $messages = $this->receive();
         foreach ($messages as $message) {
-
             $messageEvent = new MessageEvent($this->name, $message);
-            $dispatcher->dispatch(Events::Message($this->name), $messageEvent);
+            $dispatcher->dispatch($messageEvent, Events::Message($this->name));
         }
     }
 

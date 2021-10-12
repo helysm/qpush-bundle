@@ -22,8 +22,6 @@
 
 namespace Uecode\Bundle\QPushBundle\Provider;
 
-use Doctrine\Common\Cache\Cache;
-use Monolog\Logger;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Uecode\Bundle\QPushBundle\Event\MessageEvent;
 use Uecode\Bundle\QPushBundle\Event\NotificationEvent;
@@ -46,20 +44,6 @@ abstract class AbstractProvider implements ProviderInterface
      * @var array
      */
     protected $options;
-
-    /**
-     * Doctrine APC Cache Driver
-     *
-     * @var Cache
-     */
-    protected $cache;
-
-    /**
-     * Monolog Logger
-     *
-     * @var Logger
-     */
-    protected $logger;
 
     /**
      * {@inheritDoc}
@@ -87,37 +71,6 @@ abstract class AbstractProvider implements ProviderInterface
     public function getOptions()
     {
         return $this->options;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getCache()
-    {
-        return $this->cache;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getlogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function log($level, $message, array $context = [])
-    {
-        if (!$this->options['logging_enabled']) {
-            return false;
-        }
-
-        // Add the queue name and provider to the context
-        $context = array_merge(['queue' => $this->name, 'provider'  => $this->getProvider()], $context);
-
-        return $this->logger->addRecord($level, $message, $context);
     }
 
     /**

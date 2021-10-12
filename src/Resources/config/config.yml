@@ -1,7 +1,5 @@
 #Example Configuration
 uecode_qpush:
-    cache_service: null
-    logging_enabled: true
     providers:
         aws:
             key:
@@ -13,7 +11,7 @@ uecode_qpush:
             host:
     queues:
         default:
-            provider: aws #or ironmq
+            provider: aws
             options:
                 push_notifications:          true
                 notification_retries:        3

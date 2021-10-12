@@ -6,12 +6,6 @@ services:
         alias: uecode_qpush.registry
         public: true
 
-    ### QPush Default File Cache
-    uecode_qpush.file_cache:
-        class: Doctrine\Common\Cache\PhpFileCache
-        arguments: ['%kernel.cache_dir%/qpush', qpush.php]
-        public: false
-
     ### QPush Event Listeners
     uecode_qpush.request_listener:
         class: Uecode\Bundle\QPushBundle\EventListener\RequestListener

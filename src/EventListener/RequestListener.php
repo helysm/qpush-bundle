@@ -101,8 +101,8 @@ class RequestListener {
 		);
 
 		$this->dispatcher->dispatch(
-			Events::Notification($queue),
-			new NotificationEvent($queue, NotificationEvent::TYPE_MESSAGE, $notification)
+			new NotificationEvent($queue, NotificationEvent::TYPE_MESSAGE, $notification),
+            Events::Notification($queue)
 		);
 
 		return "IronMQ Notification Received.";
@@ -138,8 +138,8 @@ class RequestListener {
 			);
 
 			$this->dispatcher->dispatch(
-				Events::Notification($queue),
-				new NotificationEvent($queue, NotificationEvent::TYPE_MESSAGE, $notification)
+				new NotificationEvent($queue, NotificationEvent::TYPE_MESSAGE, $notification),
+                Events::Notification($queue)
 			);
 
 			return "SNS Message Notification Received.";
@@ -161,8 +161,8 @@ class RequestListener {
 		);
 
 		$this->dispatcher->dispatch(
-			Events::Notification($queue),
-			new NotificationEvent($queue, NotificationEvent::TYPE_SUBSCRIPTION, $notification)
+			new NotificationEvent($queue, NotificationEvent::TYPE_SUBSCRIPTION, $notification),
+			Events::Notification($queue)
 		);
 
 		return "SNS Subscription Confirmation Received.";

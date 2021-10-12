@@ -22,9 +22,6 @@
 
 namespace Uecode\Bundle\QPushBundle\Provider;
 
-use Doctrine\Common\Cache\Cache;
-use Monolog\Logger;
-
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
@@ -41,10 +38,8 @@ interface ProviderInterface
      * @param string $name    Name of the Queue the provider is for
      * @param array  $options An array of configuration options for the Queue
      * @param mixed  $client  A Queue Client for the provider
-     * @param Cache  $cache   An instance of Doctrine\Common\Cache\Cache
-     * @param Logger $logger  An instance of Mongolog\Logger
      */
-    public function __construct($name, array $options, $client, Cache $cache, Logger $logger);
+    public function __construct($name, array $options, $client);
 
     /**
      * Returns the name of the Queue that this Provider is for
@@ -77,20 +72,6 @@ interface ProviderInterface
      * @return array
      */
     public function getOptions();
-
-    /**
-     * Returns the Cache service
-     *
-     * @return Cache
-     */
-    public function getCache();
-
-    /**
-     * Returns the Logger service
-     *
-     * @return Logger
-     */
-    public function getLogger();
 
     /**
      * Creates the Queue
@@ -134,23 +115,9 @@ interface ProviderInterface
     public function delete($id);
 
     /**
-     * Destroys a Queue and clears any Queue related Cache
+     * Destroys a Queue
      *
      * @return bool
      */
     public function destroy();
-
-    /**
-     * Logs data from the library
-     *
-     * This method wraps the Logger to check if logging is enabled and adds
-     * the Queue name and Provider automatically to the context
-     *
-     * @param int    $level   The log level
-     * @param string $message The message to log
-     * @param array  $context The log context
-     *
-     * @return bool Whether the record was logged
-     */
-    public function log($level, $message, array $context);
 }

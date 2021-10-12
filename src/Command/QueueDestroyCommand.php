@@ -61,7 +61,7 @@ class QueueDestroyCommand extends Command implements ContainerAwareInterface
     {
         $this
             ->setName('uecode:qpush:destroy')
-            ->setDescription('Destroys the configured Queues and cleans Cache')
+            ->setDescription('Destroys the configured queues')
             ->addArgument(
                 'name',
                 InputArgument::OPTIONAL,

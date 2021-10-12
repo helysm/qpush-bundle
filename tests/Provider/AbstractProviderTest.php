@@ -57,7 +57,6 @@ class AbstractProviderTest extends TestCase
 
         $options = array_merge(
             [
-                'logging_enabled'       => false,
                 'push_notifications'    => true,
                 'notification_retries'  => 3,
                 'message_delay'         => 0,
@@ -75,17 +74,7 @@ class AbstractProviderTest extends TestCase
         return new TestProvider(
             'test',
             $options,
-            new \stdClass,
-            $this->createMock(
-                'Doctrine\Common\Cache\PhpFileCache',
-                [],
-                ['/tmp', 'qpush.aws.test.php']
-            ),
-            $this->createMock(
-                'Symfony\Bridge\Monolog\Logger',
-                [],
-                ['qpush.test']
-            )
+            new \stdClass
         );
     }
 
@@ -116,29 +105,6 @@ class AbstractProviderTest extends TestCase
         $options = $this->provider->getOptions();
 
         $this->assertTrue(is_array($options));
-    }
-
-    public function testGetCache()
-    {
-        $cache = $this->provider->getCache();
-
-        $this->assertInstanceOf('Doctrine\\Common\\Cache\\Cache', $cache);
-    }
-
-    public function testGetLogger()
-    {
-        $logger = $this->provider->getLogger();
-
-        $this->assertInstanceOf('Monolog\\Logger', $logger);
-    }
-
-    public function testLogEnabled()
-    {
-        $this->assertFalse($this->provider->log(100, 'test log', []));
-
-        $provider = $this->getTestProvider(['logging_enabled' => true]);
-
-        $this->assertNull($provider->log(100, 'test log', []));
     }
 
     public function testGetProvider()
