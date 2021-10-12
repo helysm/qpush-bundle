@@ -29,12 +29,12 @@ use Uecode\Bundle\QPushBundle\Message\Notification;
  */
 class NotificationTest extends BaseMessageTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->message = new Notification(123, ['foo' => 'bar'], ['baz' => 'qux']);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->message = null;
     }

@@ -22,6 +22,7 @@
 
 namespace Uecode\Bundle\QPushBundle\Tests\EventListener;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,7 +36,7 @@ use Uecode\Bundle\QPushBundle\Event\NotificationEvent;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class RequestListenerTest extends \PHPUnit_Framework_TestCase
+class RequestListenerTest extends TestCase
 {
     /**
      * @var EventDispatcher
@@ -47,7 +48,7 @@ class RequestListenerTest extends \PHPUnit_Framework_TestCase
      */
     protected $event;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->dispatcher = new EventDispatcher('UTF-8');
         $listener         = new RequestListener($this->dispatcher);

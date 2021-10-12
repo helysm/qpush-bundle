@@ -3,10 +3,11 @@
 namespace Uecode\Bundle\QPushBundle\Tests\Provider;
 
 
+use PHPUnit\Framework\TestCase;
 use Uecode\Bundle\QPushBundle\Provider\CustomProvider;
 use Uecode\Bundle\QPushBundle\Tests\MockClient\CustomMockClient;
 
-class CustomProviderTest extends \PHPUnit_Framework_TestCase
+class CustomProviderTest extends TestCase
 {
     /**
      * @var \Uecode\Bundle\QPushBundle\Provider\SyncProvider
@@ -20,7 +21,7 @@ class CustomProviderTest extends \PHPUnit_Framework_TestCase
 
     private $mock;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->provider = $this->getCustomProvider();
     }

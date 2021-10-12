@@ -22,6 +22,7 @@
 
 namespace Uecode\Bundle\QPushBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -31,7 +32,7 @@ use Uecode\Bundle\QPushBundle\DependencyInjection\UecodeQPushExtension;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class UecodeQPushExtensionTest extends \PHPUnit_Framework_TestCase
+class UecodeQPushExtensionTest extends TestCase
 {
     /**
      * QPush Extension
@@ -47,7 +48,7 @@ class UecodeQPushExtensionTest extends \PHPUnit_Framework_TestCase
      */
     private $container;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->extension = new UecodeQPushExtension();
         $this->container = new ContainerBuilder(new ParameterBag(['kernel.cache_dir' => '/tmp']));
