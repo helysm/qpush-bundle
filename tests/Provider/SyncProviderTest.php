@@ -3,10 +3,11 @@
 namespace Uecode\Bundle\QPushBundle\Tests\Provider;
 
 
+use PHPUnit\Framework\TestCase;
 use Uecode\Bundle\QPushBundle\Event\Events;
 use Uecode\Bundle\QPushBundle\Provider\SyncProvider;
 
-class SyncProviderTest extends \PHPUnit_Framework_TestCase
+class SyncProviderTest extends TestCase
 {
     /**
      * @var \Uecode\Bundle\QPushBundle\Provider\SyncProvider
@@ -23,7 +24,7 @@ class SyncProviderTest extends \PHPUnit_Framework_TestCase
      */
     protected $logger;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->dispatcher = $this->createMock(
             'Symfony\Component\EventDispatcher\EventDispatcherInterface'

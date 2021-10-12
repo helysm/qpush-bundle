@@ -4,3 +4,4 @@
 /coverage
 .idea
 /nbproject
+/.phpunit.result.cache

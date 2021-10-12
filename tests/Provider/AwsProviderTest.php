@@ -22,6 +22,7 @@
 
 namespace Uecode\Bundle\QPushBundle\Tests\Provider;
 
+use PHPUnit\Framework\TestCase;
 use Uecode\Bundle\QPushBundle\Provider\AwsProvider;
 
 use Uecode\Bundle\QPushBundle\Event\MessageEvent;
@@ -35,7 +36,7 @@ use Uecode\Bundle\QPushBundle\Tests\MockClient\AwsMockClient;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class AwsProviderTest extends \PHPUnit_Framework_TestCase
+class AwsProviderTest extends TestCase
 {
     /**
      * Mock Client
@@ -44,12 +45,12 @@ class AwsProviderTest extends \PHPUnit_Framework_TestCase
      */
     protected $provider;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->provider = $this->getAwsProvider();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->provider = null;
     }

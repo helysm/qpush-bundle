@@ -22,6 +22,7 @@
 
 namespace Uecode\Bundle\QPushBundle\Tests\Event;
 
+use PHPUnit\Framework\TestCase;
 use Uecode\Bundle\QPushBundle\Event\MessageEvent;
 
 use Uecode\Bundle\QPushBundle\Message\Message;
@@ -29,16 +30,16 @@ use Uecode\Bundle\QPushBundle\Message\Message;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class MessageEventTest extends \PHPUnit_Framework_TestCase
+class MessageEventTest extends TestCase
 {
     protected $event;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->event = new MessageEvent('test', new Message(123, ['foo' => 'bar'], ['bar' => 'baz']));
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->event = null;
     }

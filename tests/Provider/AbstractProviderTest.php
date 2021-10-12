@@ -22,6 +22,7 @@
 
 namespace Uecode\Bundle\QPushBundle\Tests\Provider;
 
+use PHPUnit\Framework\TestCase;
 use Uecode\Bundle\QPushBundle\Provider\ProviderInterface;
 
 use Uecode\Bundle\QPushBundle\Event\MessageEvent;
@@ -33,16 +34,16 @@ use Uecode\Bundle\QPushBundle\Message\Notification;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class AbstractProviderTest extends \PHPUnit_Framework_TestCase
+class AbstractProviderTest extends TestCase
 {
     protected $provider;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->provider = $this->getTestProvider();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->provider = null;
 
