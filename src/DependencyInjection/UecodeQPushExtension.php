@@ -81,7 +81,6 @@ class UecodeQPushExtension extends Extension
             );
 
             $definition->setPublic(true);
-            $definition->setSynthetic(true);
 
             $isProviderAWS = $config['providers'][$provider]['driver'] === 'aws';
             $isQueueNameSet = isset($values['options']['queue_name']) && !empty($values['options']['queue_name']);
