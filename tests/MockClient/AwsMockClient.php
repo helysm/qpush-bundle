@@ -27,7 +27,7 @@ namespace Uecode\Bundle\QPushBundle\Tests\MockClient;
  *
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class AwsMockClient extends \Aws\Common\Aws
+class AwsMockClient
 {
     public function get($name, $throwAway = false)
     {
