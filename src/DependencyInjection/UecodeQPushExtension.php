@@ -74,6 +74,10 @@ class UecodeQPushExtension extends Extension
                         $provider
                     );
                     break;
+                case 'sync':
+                    $class  = $container->getParameter('uecode_qpush.provider.sync');
+                    $client = $this->createSyncClient();
+                    break;
             }
 
             $definition = new Definition(
@@ -170,44 +174,6 @@ class UecodeQPushExtension extends Extension
     }
 
     /**
-     * Creates a definition for the IronMQ provider
-     *
-     * @param array            $config    A Configuration array for the provider
-     * @param ContainerBuilder $container The container
-     * @param string           $name      The provider key
-     *
-     * @throws RuntimeException
-     *
-     * @return Reference
-     */
-    private function createIronMQClient($config, ContainerBuilder $container, $name)
-    {
-        $service = sprintf('uecode_qpush.provider.%s', $name);
-
-        if (!$container->hasDefinition($service)) {
-
-            if (!class_exists('IronMQ\IronMQ')) {
-                throw new RuntimeException('You must require "iron-io/iron_mq" to use the Iron MQ provider.');
-            }
-
-            $ironmq = new Definition('IronMQ\IronMQ');
-            $ironmq->setArguments([
-                [
-                    'token'         => $config['token'],
-                    'project_id'    => $config['project_id'],
-                    'host'          => sprintf('%s.iron.io', $config['host']),
-                    'port'          => $config['port'],
-                    'api_version'   => $config['api_version']
-                ]
-            ]);
-
-            $container->setDefinition($service, $ironmq)->setPublic(false);
-        }
-
-        return new Reference($service);
-    }
-
-    /**
      * @return Reference
      */
     private function createSyncClient()
@@ -215,21 +181,6 @@ class UecodeQPushExtension extends Extension
         return new Reference('event_dispatcher');
     }
     
-    private function createDoctrineClient($config)
-    {
-        return new Reference($config['entity_manager']);
-    }
-
-    /**
-     * @param string $serviceId
-     *
-     * @return Reference
-     */
-    private function createCustomClient($serviceId)
-    {
-        return new Reference($serviceId);
-    }
-
     /**
      * Returns the Extension Alias
      *
