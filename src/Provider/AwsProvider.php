@@ -186,6 +186,11 @@ class AwsProvider extends AbstractProvider
         }
 
         if ($options['push_notifications']) {
+
+            if (!$this->topicExists()) {
+                $this->create();
+            }
+
             $message    = [
                 'default' => $this->getNameWithPrefix(),
                 'sqs'     => json_encode($message),
