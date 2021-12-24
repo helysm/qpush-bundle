@@ -85,6 +85,23 @@ class UecodeQPushExtension extends Extension
             );
 
             $definition->setPublic(true);
+            $definition
+                ->addTag(
+                    'uecode_qpush.event_listener',
+                    [
+                        'event' => "{$queue}.on_notification",
+                        'method' => "onNotification",
+                        'priority' => 255
+                    ]
+                )
+                ->addTag(
+                    'uecode_qpush.event_listener',
+                    [
+                        'event' => "{$queue}.message_received",
+                        'method' => "onMessageReceived",
+                        'priority' => -255
+                    ]
+                );
 
             $isProviderAWS = $config['providers'][$provider]['driver'] === 'aws';
             $isQueueNameSet = isset($values['options']['queue_name']) && !empty($values['options']['queue_name']);
