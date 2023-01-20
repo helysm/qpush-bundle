@@ -28,7 +28,7 @@ use Uecode\Bundle\QPushBundle\Message\Notification;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class NotificationEvent extends Event
+class NotificationEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     /**
      * A Subscription Notification Type

@@ -60,8 +60,8 @@ class SyncProvider extends AbstractProvider
         $message = new Message(time(), $message, []);
 
         $this->dispatcher->dispatch(
-            Events::Message($this->name),
-            new MessageEvent($this->name, $message)
+            new MessageEvent($this->name, $message),
+            Events::Message($this->name)
         );
 
         $context = ['MessageId' => $message->getId()];

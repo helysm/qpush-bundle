@@ -77,7 +77,7 @@ class QueueDestroyCommand extends Command implements ContainerAwareInterface
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
         $registry = $this->container->get('uecode_qpush');
@@ -97,7 +97,7 @@ class QueueDestroyCommand extends Command implements ContainerAwareInterface
                 }
             }
 
-            return $this->destroyQueue($registry, $name);
+            return (int) $this->destroyQueue($registry, $name);
         }
 
         if (!$input->getOption('force')) {

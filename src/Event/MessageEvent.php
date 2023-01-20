@@ -28,7 +28,7 @@ use Uecode\Bundle\QpushBundle\Message\Message;
 /**
  * @author Keith Kirk <kkirk@undergroundelephant.com>
  */
-class MessageEvent extends Event
+class MessageEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     /**
      * Queue name
