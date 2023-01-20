@@ -61,7 +61,7 @@ class UecodeQPushExtensionTest extends TestCase
         $loader = new YamlFileLoader($this->container, new FileLocator(__DIR__.'/../Fixtures/'));
         $loader->load('config_test.yml');
 
-        $this->container->compile();
+        $this->container->compile(true);
 
         $this->assertTrue($this->container->has('uecode_qpush'));
 

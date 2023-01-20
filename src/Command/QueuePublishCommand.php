@@ -73,7 +73,7 @@ class QueuePublishCommand extends Command implements ContainerAwareInterface
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
         $registry = $this->container->get('uecode_qpush');
@@ -81,7 +81,7 @@ class QueuePublishCommand extends Command implements ContainerAwareInterface
         $name = $input->getArgument('name');
         $message = $input->getArgument('message');
 
-        return $this->sendMessage($registry, $name, $message);
+        return (int) $this->sendMessage($registry, $name, $message);
     }
 
     private function sendMessage($registry, $name, $message)

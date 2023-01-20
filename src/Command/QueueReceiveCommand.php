@@ -71,7 +71,7 @@ class QueueReceiveCommand extends Command implements ContainerAwareInterface
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
         $registry = $this->container->get('uecode_qpush');
@@ -79,7 +79,7 @@ class QueueReceiveCommand extends Command implements ContainerAwareInterface
         $name = $input->getArgument('name');
 
         if (null !== $name) {
-            return $this->pollQueue($registry, $name);
+            return (int) $this->pollQueue($registry, $name);
         }
 
         foreach ($registry->all() as $queue) {
